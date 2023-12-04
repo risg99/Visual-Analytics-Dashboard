@@ -1,0 +1,80 @@
+{
+    "children": [
+        {
+            "name": "Male",
+            "color": "#a64d79",
+            "children": [
+                {
+                    "name": "Perceived Normal",
+                    "color": "#c27ba0",
+                    "children": [
+                        {
+                            "name": "Sought Help",
+                            "color": "#ead1dc",
+                            "value": 4073
+                        },
+                        {
+                            "name": "Didnot Seek Help",
+                            "color": "#d5a6bd",
+                            "value": 1111
+                        }
+                    ]
+                },
+                {
+                    "name": "Not Perceived Normal",
+                    "color": "#c27ba0",
+                    "children": [
+                        {
+                            "name": "Sought Help",
+                            "color": "#ead1dc",
+                            "value": 5163
+                        },
+                        {
+                            "name": "Didnot Seek Help",
+                            "color": "#d5a6bd",
+                            "value": 1312
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Female",
+            "color": "#45818e",
+            "children": [
+                {
+                    "name": "Perceived Normal",
+                    "color": "#76a5af",
+                    "children": [
+                        {
+                            "name": "Sought Help",
+                            "color": "#d0e0e3",
+                            "value": 14116
+                        },
+                        {
+                            "name": "Didnot Seek Help",
+                            "color": "#a2c4c9",
+                            "value": 1666
+                        }
+                    ]
+                },
+                {
+                    "name": "Not Perceived Normal",
+                    "color": "#76a5af",
+                    "children": [
+                        {
+                            "name": "Sought Help",
+                            "color": "#d0e0e3",
+                            "value": 16107
+                        },
+                        {
+                            "name": "Didnot Seek Help",
+                            "color": "#a2c4c9",
+                            "value": 1884
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

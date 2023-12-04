@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title> GUPTA | KRISH </title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
+	<script src='https://cdn.plot.ly/plotly-2.27.0.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js'></script>
+
+</head>
+
+<body>
+	<h1 style="text-align:center">
+		Mental-Health Help-Seeking Behaviour
+	</h1>
+	<br><br>
+	<div class="container">
+		<select id="yearDropdown" onchange="updateChart()" class="custom-select custom-select-container">
+			<option value="2019_20">2019-20</option>
+			<option value="2020_21">2020-21</option>
+			<option value="2021_22">2021-22</option>
+			<option value="2022_23" selected>2022-23</option>
+		</select>
+		<div id="myDiv" class="responsive-svg-container"></div>
+	</div>
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<script src="./js/script.js"></script>
+</body>
+
+</html>
