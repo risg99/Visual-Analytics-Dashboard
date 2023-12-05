@@ -1,8 +1,15 @@
 body {
   font-family: 'Open Sans', sans-serif;
-  background-color: #faf0e6;
+  background-color: #f0e4cc !important;
   font-size: 12px;
   font-weight: 400;
+}
+
+.container {
+  margin-left: 90px;
+  margin-top: 40px;
+  text-align: right;
+  display: block;
 }
 
 .responsive-svg-container {
@@ -16,15 +23,23 @@ body {
   height: 500px;
 }
 
+.responsive-svg-container-legend {
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  width: 200%;
+  max-width: 2000px;
+  height: 500px;
+}
+
 .myDiv svg {
   width: 100%;
   height: 100%;
 }
 
-.container {
-  margin-left: 90px;
-  text-align: right;
-  display: block;
+.myLegend svg{
+  width: 100%;
+  height: 100%;
 }
 
 .custom-select {
