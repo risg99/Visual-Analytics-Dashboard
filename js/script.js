@@ -116,8 +116,7 @@ const createMainFlowChart = (data) => {
           .attr("transform", d => `rotate(${text_placements[d.name][0]}) translate(${text_placements[d.name][1]},${text_placements[d.name][2]})`)
 
   const subgraph_data = [{
-    category: 'awareness', graph: 'Graph1', x: 20000, y: 24500, html: '../html/awareness_graph.html',
-    image: 'https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png'
+    category: 'awareness', graph: 'Graph1', x: 20000, y: 24500, html: '../html/awareness_graph.html', caption: 'Perceived Illness'
   },
     { category: 'awareness', graph: 'Graph2', x: 22000, y: 26000 },
     { category: 'awareness', graph: 'Graph3', x: 24000, y: 27500 },
@@ -125,28 +124,37 @@ const createMainFlowChart = (data) => {
     { category: 'willingness', graph: 'Graph5', x: 66500, y: 14500 },
     { category: 'willingness', graph: 'Graph6', x: 68000, y: 12000 }
   ]
-  
-  
-  const subgraphs = svg.append('g')
+   
+  // svg.append('defs')
+  // .data(subgraph_data)
+  //   .append('pattern')
+  //   .attr('id', 'image')
+  //   .append('image')
+  // .attr("xlink:href", "../images/sunburst.png")
+
+
+  const subgraphs_parent = svg.append('g')
     .selectAll('.subgraphs')
     .data(subgraph_data)
     .enter()
-    .append("circle")
+    
+  const subgraphs = subgraphs_parent.append("circle")
     .attr("r", 800)
     .attr("class", "subgraphs")
     .attr('id', d=> d.graph)
     .attr("cx", d => d.x)
     .attr("cy", d => d.y)
+    .attr('fill', 'black')
 
-    subgraphs
-    .append("clipPath")
-    .attr("class", "clipSubgraph")
-      .append('circle')
-      .attr('id','innerCircle')
-    .attr("cx", d => d.x)
-    .attr("cy", d => d.y)
-    .attr('r', 800)
-    ;
+  subgraphs_parent.append('text')
+    .attr('id', d=> `text_${d.graph}`)
+  .text(d => d.caption? `${d.caption}`:'')
+    .attr("x", d=>(d.x))
+    .attr("y", d=>d.y)
+    .attr("text-anchor", "middle")
+  .style('fill','white')
+
+
   
   subgraphs.on("click", (d,i) => {
 
@@ -181,8 +189,8 @@ const createMainFlowChart = (data) => {
     
 })
   // subgraphs.on('click',  handleMouseOver)
-  .on("mouseover", handleMouseOver)
-    .on("mouseout", handleMouseOut);
+    .on("mouseover", (d, i) => { return (handleMouseOver(i)) })
+    .on("mouseout", (d, i) => { return (handleMouseOut(i)) });
 
 
   // Creates the paths that represent the links.
@@ -227,7 +235,6 @@ const createMainFlowChart = (data) => {
     .attr("cx", 1500)
     .attr("cy", function(d,i){ return 2000 + i*(size+1000)}) 
     .attr("r", size)
-    // .attr("height", size)
     .style("fill", function (d) { return colorScale(d) })
   
 
@@ -254,29 +261,32 @@ function closeModal() {
 }
 
 // Function to handle mouseover event
-function handleMouseOver() {
-    d3.select(this).transition()
+function handleMouseOver(d) {
+
+  d3.select(`#${d.graph}`).transition()
         .duration(200)
-        .attr("r", 5000); // Increase the radius on hover
+      .attr("r", 5000) // Increase the radius on hover
+    
+  d3.select(`#text_${d.graph}`)
+    .transition()
+    .duration(200)
+    .style("font-size", "800px")
+    .style('font-weight', 700)
   
-  // d3.select(this)
-  //   .select('#innerCircle')
-  //   .append('image')
-  //   .attr('id','img')
-  //   // .attr('xlink:href', d => d.image)
-  //   // .attr('width', 1000)
-  //   // .attr('height', 1000)
+
 }
 
 // Function to handle mouseout event
-function handleMouseOut() {
-    d3.select(this).transition()
+function handleMouseOut(d) {
+    d3.select(`#${d.graph}`).transition()
         .duration(200)
     .attr("r", 800); // Restore the original radius on mouseout
   
-  // d3.select(this)
-  //   .select('#img')
-  // .remove()
+  d3.select(`#text_${d.graph}`)
+    .transition()
+    .duration(200)
+    .style("font-size", "0")
+    .style('font-weight', 0)
   
 }
 
