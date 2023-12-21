@@ -1,42 +1,53 @@
 body {
-  font-family: 'Open Sans', sans-serif;
-  background-color: #f0e4cc !important;
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.container {
-  margin-left: 90px;
-  margin-top: 40px;
-  text-align: right;
-  display: block;
+  font-family: 'Courier New', monospace; 
 }
 
 .responsive-svg-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   margin-right: auto;
   margin-left: auto;
   width: 100%;
-  max-width: 1000px;
-  height: 500px;
+  /* max-width: 1000px; */
 }
 
-.responsive-svg-container-legend {
-  display: flex;
-  justify-content: left;
-  align-items: left;
-  width: 200%;
-  max-width: 2000px;
-  height: 500px;
+.footer {
+  text-align:center; 
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 15px;
+  width: 100%;
+  max-width: 1000px;
 }
+
+/* Styling for the transparent overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* 0.5 transparent black background */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Close button styling */
+.close-btn {
+  position:absolute;
+  top: 1%;
+  right: 2%;
+  cursor: pointer;
+}
+
 
 .myDiv svg {
   width: 100%;
   height: 100%;
 }
 
+
+/*Awareness graph*/
 .myLegend svg{
   width: 100%;
   height: 100%;

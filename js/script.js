@@ -1,205 +1,497 @@
-window.addEventListener("load", setDefaultView);
+import { load }  from './awareness_subgraph.js'
 
-function setDefaultView() {
-    var defaultYear = "2022_23"; // Setting default year to 2022-23
-    updateChartForYear(defaultYear); // Function call to update chart with default year
-}
+/* Load the dataset and formatting variables
+  Ref: https://www.d3indepth.com/requests/ */
+d3.csv("../data/data.csv", d => { 
+  return {
+    mentalHealthProblem: +d.anymhprob,
+    haveTakenMeds: +d.meds_any,
+    txAny: +d.tx_any,
+    haveInformalHelp: +d.inf_any,
+    haveTherapy: +d.ther_any,
+    awareness: +d.percneed,
+    expression: +d.know_sp,
+    availability: +d.knowwher,
+    willingness: +d.dep_secret
+  }
+}).then(data => {
 
-function updateChart() {
-    // Get the selected year from the dropdown
-    var selectedYear = document.getElementById("yearDropdown").value;
-    console.log(selectedYear);
+  /* Data Manipulation in D3
+    Ref: https://observablehq.com/@d3/d3-extent?collection=@d3/d3-array */
+  
+  console.log('Data before formatting',data)
 
-    // Function call to update the chart based on the selected year
-    updateChartForYear(selectedYear);
-}
-
-function convertToInt(node) {
-    if (node.value !== undefined && !isNaN(node.value)) {
-        console.log(typeof node.value);
-        node.value = parseInt(node.value);
+  data = data.map(d => {
+    return {
+      mentalHealthProblem: d.mentalHealthProblem == 1,
+      sought_help: (d.haveTakenMeds + d.txAny + d.haveInformalHelp + d.haveTherapy)>0 ,
+      awareness: d.awareness < 4,
+      expression: d.expression < 3,
+      availability: d.availability < 4,
+      willingness: d.willingness > 2      
     }
-    if (node.children) {
-        node.children.forEach(convertToInt);
-    }
+  })
+
+  console.log('Data after formatting', data)
+  createMainFlowChart(data);
+
+  
+  // All data are categorical.
+  
+})
+
+const createMainFlowChart = (data) => {
+
+  /* Set the dimensions and margins of the graph
+    Ref: https://observablehq.com/@d3/margin-convention */
+  
+  const width = 80000, height = 42000;
+  
+  data = dataProcessingForMainFlowChart(data, width, height)
+
+  // Create a SVG container.
+  d3.select('#bar').attr('style', `margin-top: 30px; margin-bottom: 10px; max-width: 88%`)
+
+  const svg = d3.select('#bar').append('svg')
+    .attr('viewBox', [0, 0, width, height ])
+    .attr("style", "max-width: 100%; max-height: 100%; font: 10px sans-serif; background-color:#dddddd59; outline: thin solid #E0E0E0; ")
+    .attr("preserveAspectRatio", "xMinYMin meet")
+
+  // Constructs and configures a Sankey generator.
+  const sankey = d3.sankey()
+    .nodeId(d => d.name)
+    .nodeWidth(100)
+    .nodePadding(500);
+
+  // Applies it to the data. We make a copy of the nodes and links objects
+  // so as to avoid mutating the original.
+  const {nodes, links} = sankey({
+    nodes: data.nodes.map(d => Object.assign({}, d)),
+    links: data.links.map(d => Object.assign({}, d))
+  });
+
+  let legend = ['positive behavior', 'negative behavior', 'sought help', 'did not seek help']
+  let colorScale = d3.scaleOrdinal()
+  .domain(legend)
+    .range(['#4C9900', '#7f7f7f', '#FF9933','#8C564B' ]);
+  
+  // Creates the transparent circles that represent the nodes.
+  const circle_node = svg.append('g')
+    .selectAll('.node')
+    .data(nodes)
+    .enter()
+    .append("g")
+    .attr("class", "node")
+    .attr("transform", d => `translate(${d.x}, ${d.y})`)
+      
+  
+    circle_node.append("circle")
+    .attr("r", 1)
+      .attr("fill", d => colorScale(d.name))
+  
+  let text_placements = {
+    'mentalHealthProblem': [0, -600, 600 ],
+    'awareness': [34, 3000,2000], '~aware and ~sought help': [0, -2000,-2800],
+    'expression': [-70, 8000, 5000], '~expressive and ~sought help': [0, -900,-1000],
+    'availability': [55, 7000, -4000], '~available and ~sought help': [0, 500,-7000],
+    'willingness': [-55, 5000, 4500], '~willing and ~sought help': [0, 500,-5000],
+    'help': [0, 0,0], 'sought_help':[0, -4200,4000], 'not_sought_help': [0, -1500,0]
+  }
+
+  // Adds a title on the nodes.
+  circle_node.append("text")
+    .text(d => `${d.subtext}`)
+    .style("font-size", "800px")
+    .style('font-weight', 700)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "end")
+      .attr("transform", d => `rotate(${text_placements[d.name][0]}) translate(${text_placements[d.name][1] + 6000 },${text_placements[d.name][2]-1000})`)
+
+  circle_node.append("text")
+        .text(d => `${d.text}`)
+        .style("font-size", "800px")
+        .style('font-weight', 700)
+          .attr("dy", ".35em")
+          .attr("text-anchor", "start")
+          .attr("transform", d => `rotate(${text_placements[d.name][0]}) translate(${text_placements[d.name][1]},${text_placements[d.name][2]})`)
+
+  const subgraph_data = [{
+    category: 'awareness', graph: 'Graph1', x: 20000, y: 24500, html: '../html/awareness_graph.html',
+    image: 'https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png'
+  },
+    { category: 'awareness', graph: 'Graph2', x: 22000, y: 26000 },
+    { category: 'awareness', graph: 'Graph3', x: 24000, y: 27500 },
+    { category: 'willingness', graph: 'Graph4', x: 65000, y: 17000, html: '../html/awareness_graph.html' },
+    { category: 'willingness', graph: 'Graph5', x: 66500, y: 14500 },
+    { category: 'willingness', graph: 'Graph6', x: 68000, y: 12000 }
+  ]
+  
+  
+  const subgraphs = svg.append('g')
+    .selectAll('.subgraphs')
+    .data(subgraph_data)
+    .enter()
+    .append("circle")
+    .attr("r", 800)
+    .attr("class", "subgraphs")
+    .attr('id', d=> d.graph)
+    .attr("cx", d => d.x)
+    .attr("cy", d => d.y)
+
+    subgraphs
+    .append("clipPath")
+    .attr("class", "clipSubgraph")
+      .append('circle')
+      .attr('id','innerCircle')
+    .attr("cx", d => d.x)
+    .attr("cy", d => d.y)
+    .attr('r', 800)
+    ;
+  
+  subgraphs.on("click", (d,i) => {
+
+    d3.select(`#${i.graph}`).attr('r', 5000)
+    
+    console.log("Subgraph ", i.graph);
+    const overlay = d3.select('.overlay').style('display', 'flex')
+
+    overlay.select('.close-btn') ? overlay.select('.close-btn').remove() : null
+    overlay.append('span')
+    .attr('class','close-btn')
+      .text('x')
+      .style("font-size", "45px")
+      .style('font-weight', 900)
+      .style('color','white')
+      .on('click', closeModal);
+    
+    overlay.select('#model') ? overlay.select('#model').remove() : null
+
+    d3.text(i.html).then((data) => {
+      
+      overlay.append('div')
+        .attr('viewBox', [0, 0, width, height])
+        .attr('id', 'model')
+        .attr("style", "max-width: 100%; max-height: 100%; font: 10px sans-serif; background-color:rgba(247, 247, 247, 0.959); outline: thin solid #E0E0E0; ")
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .html(data);
+      
+      load();
+
+    })
+    
+})
+  // subgraphs.on('click',  handleMouseOver)
+  .on("mouseover", handleMouseOver)
+    .on("mouseout", handleMouseOut);
+
+
+  // Creates the paths that represent the links.
+  const link = svg.append("g")
+    .attr("fill", "none")
+    .attr("stroke-opacity", 0.5)
+    .selectAll()
+    .data(links)
+    .join("g")
+    .style("mix-blend-mode", "multiply");
+ 
+  let y_multiplier = 70 // to add space between links to make them look like strands
+  
+  let curve = d3.link(d3.curveBumpX).source((d) => [d.source.x + (d.source.index_axis == 0 ? (d.start_index * y_multiplier): 0), d.source.y + (d.source.index_axis == 1 ? (d.start_index * y_multiplier): 0)])
+    .target((d) => [d.target.x + (d.target.index_axis == 0 ? (d.end_index * y_multiplier): 0), d.target.y + (d.target.index_axis == 1 ? (d.end_index * y_multiplier): 0)])
+    .x(d => d[0]).y(d => d[1]);
+  
+  link.append("path")
+    .attr("d", d => curve(d))
+    .attr("stroke", (d) => colorScale(d.category))
+    .attr("stroke-width", 40);
+
+  link.append("title")
+    .text(d => `${d.text}\n${d.percentage}%`);
+  
+  link.append('circle')
+    .attr('cx', d => d.target.x - (d.target.terminal_phase & d.category == 'positive behavior'? Math.floor(Math.random() * 300) : d.target.terminal_phase? Math.floor(Math.random() * 100):0 ))
+    .attr('cy', d => d.target.y + (d.end_index * y_multiplier))
+    .attr('r', d => d.target.terminal_phase ? 100: 0)
+    .attr("stroke", "black")
+    .attr('stroke-width', 10)
+    .attr("fill", d => colorScale(d.category == 'positive behavior'? 'sought help' : 'did not seek help') )
+    
+  
+  let size = 500
+
+  // Create legend
+  svg.append("g")
+    .selectAll()
+  .data(legend)
+  .join("circle")
+    .attr("cx", 1500)
+    .attr("cy", function(d,i){ return 2000 + i*(size+1000)}) 
+    .attr("r", size)
+    // .attr("height", size)
+    .style("fill", function (d) { return colorScale(d) })
+  
+
+// Add one dot in the legend for each name.
+  svg.append("g")
+  .selectAll()
+  .data(legend)
+  .join("text")
+    .attr("x", 1500 + size*2)
+    .attr("y", (d,i)=>{ return 2000 + i*(size+1000) }) 
+    .style("fill", d=>{ return colorScale(d)})
+    .text(d=>{ return `${d}`})
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+    .style("font-size", "800px")
+    .style('font-weight', 700);
+  
+  return svg.node();
+
 }
 
-function updateChartForYear(selectedYear) {
-    document.getElementById('myDiv').innerHTML = '';
-    document.getElementById('myLegend').innerHTML = '';
+function closeModal() {
+  d3.select('.overlay').style('display', 'none');
+}
 
-    var fileName = `./data/data_${selectedYear}.json`;
+// Function to handle mouseover event
+function handleMouseOver() {
+    d3.select(this).transition()
+        .duration(200)
+        .attr("r", 5000); // Increase the radius on hover
+  
+  // d3.select(this)
+  //   .select('#innerCircle')
+  //   .append('image')
+  //   .attr('id','img')
+  //   // .attr('xlink:href', d => d.image)
+  //   // .attr('width', 1000)
+  //   // .attr('height', 1000)
+}
 
-    // Loading the json file using d3
-    d3.json(fileName, d => {
-        return {
-            children: d.children
+// Function to handle mouseout event
+function handleMouseOut() {
+    d3.select(this).transition()
+        .duration(200)
+    .attr("r", 800); // Restore the original radius on mouseout
+  
+  // d3.select(this)
+  //   .select('#img')
+  // .remove()
+  
+}
+
+const scalerFunc = (data, normalizer) => {
+  return Math.round(data.length/normalizer)
+}
+
+const dataProcessingForMainFlowChart = (data, width, height) => {
+
+  const margins = { top: height / 21,  bottom: height / 21, left: width/40, right: width/40};
+
+  // This function scales and transforms the data according to the required format for the graph
+  // Nodes -> Each phase of menatal health help seeking behavior (Not shown in the graph as nodes, but created for the purpose of creating links
+  // and displaying details related to phases)
+  // Link -> Transition from one stage to another
+
+  let nomalizer = data.length / 100  //Used to generate percentages (graph shows a summary)
+
+  let passed_awareness = data.filter(d => (!(!(d.awareness) & !(d.expression) & !(d.availability) & !(d.willingness) & !(d.sought_help))))
+  let passed_expression = passed_awareness.filter(d => (!(!(d.expression) & !(d.availability) & !(d.willingness) & !(d.sought_help))))
+  let passed_availability = passed_expression.filter(d => (!(!(d.availability) & !(d.willingness) & !(d.sought_help))))
+  let passed_willingness = passed_availability.filter(d => (!(!(d.willingness) & !(d.sought_help))))
+
+  let nodes = [
+  
+    // {name: NodeID,
+    //text: To be displayed on the flow,
+    //subtext : To be displayed when hovered over
+    // x: x position of the node, y: position of the node, 
+    //terminal_phase: Used to identify whether the node is a terminal phase or an intermediate phase , 
+    //index_axis: Axis to distribute the links at connection nodes - 1 indicates along the y axis and 0 indicates along the x axis },
+  
+    { name: 'mentalHealthProblem', text: 'HAVE \nMENTAL \nILLNESS', subtext:'', x: margins.left, y: height - margins.bottom, terminal_phase: false, index_axis : 0}, 
+    {
+      name: 'awareness', text: `AWARENESS OF ILLNESS`, subtext: `${scalerFunc(passed_awareness,nomalizer)}%`,
+      x: (2 * width / 12), y: (8 * height) / 14, terminal_phase: false, index_axis: 1
+    }, 
+    {
+      name: '~aware and ~sought help',
+      text: `${scalerFunc(data.filter(d => (!(d.awareness) & !(d.expression) & !(d.availability) & !(d.willingness) & !(d.sought_help))), nomalizer)}%`,
+      subtext:'',
+      x: (3 * width / 12), y: (13 * height) / 14 , terminal_phase: true, index_axis: 1
+    },
+
+    {
+      name: 'expression', text: `ABILITY TO EXPRESS`, subtext: `${scalerFunc(passed_expression,nomalizer)}%`,
+      x: (4 * width) / 12, y: height * 5 / 7, terminal_phase: false, index_axis: 1
+    },
+    {
+      name: '~expressive and ~sought help',
+      text: `${scalerFunc(passed_awareness.filter(d => (!(d.expression) & !(d.availability) & !(d.willingness) & !(d.sought_help))), nomalizer) + 1}%`,
+      subtext:'',
+      x: (5 * width) / 12 , y: (13 * height)/14, terminal_phase: true, index_axis: 1
+    },
+
+    {
+      name: 'availability', text: `AVAILABILITY OF HELP`, subtext: `${scalerFunc(passed_availability ,nomalizer)}%`,
+      x: (6 * width) / 12, y: height / 7, terminal_phase: false, index_axis: 0
+    },
+    {
+      name: '~available and ~sought help', text: `${scalerFunc(passed_expression.filter(d => (!(d.availability) & !(d.willingness) & !(d.sought_help))), nomalizer)}%`,
+      subtext:'',
+      x: (7 * width / 12), y: (5 * height) / 7, terminal_phase: true, index_axis: 1
+    },
+
+    {
+      name: 'willingness', text: `WILLINGNESS TO SHARE`, subtext: `${scalerFunc( passed_willingness, nomalizer)}%`,
+      x: (8 * width) / 12, y: (3 * height) / 7, terminal_phase: false, index_axis: 0
+    },
+    {
+      name: '~willing and ~sought help', text: `${scalerFunc(passed_availability.filter(d => (!(d.willingness) & !(d.sought_help))), nomalizer)}%`,
+      subtext:'',
+      x: (9 * width / 12), y: (5 * height) / 7, terminal_phase: true, index_axis: 1
+    },
+
+    { name: 'help', text: '',subtext:'', x: (10 * width)/12, y: height/7 , terminal_phase: false , index_axis : 0},
+    {
+      name: 'sought_help', text: ``, subtext: `${scalerFunc(passed_willingness.filter(d => d.sought_help), nomalizer)}%`,
+      x: width - margins.right, y: margins.top, terminal_phase: true, index_axis: 1
+    },
+    {
+      name: 'not_sought_help', text: `${scalerFunc(passed_willingness.filter(d => ((!(d.sought_help)))), nomalizer)}%`,
+      subtext:'',
+      x: width-  margins.right, y: (3 * height)/ 7, terminal_phase: true, index_axis: 1
+    },
+  ]
+
+  let links = [
+    // Initialization of link types
+    // {
+    //   source: The source node
+    //   target: The target node
+    //   value: scaled number of people transitioning from one phase to the next
+    //   category: Whether the link represents a positive behavior or a negative behaviour at this stage
+    //   text: Text to  be displayed when hovered over the link
+    // }
+    
+    {
+      source: 'mentalHealthProblem', target: 'awareness',
+      value: scalerFunc(data, nomalizer),
+      category: 'positive behavior', text: ""
+    },
+    null, null,    // Note : In order to support the link popularizing algorithm
+      // From Awareness to Expression
+    {
+      source: 'awareness', target: 'expression',
+      value: scalerFunc(data.filter(d => ((d.awareness))),nomalizer),
+      category: 'positive behavior', text: "They know they need help" 
+    },
+    {
+      source: 'awareness', target: 'expression',
+      value: scalerFunc(data.filter(d => (!(d.awareness) & !(!(d.expression) & !(d.availability) & !(d.willingness) & !(d.sought_help)))), nomalizer),
+      category: 'negative behavior', text: "Thinks they don't need help"
+    },
+    {
+      source: 'awareness', target: '~aware and ~sought help',
+      value: scalerFunc(data.filter(d => (!(d.awareness) & !(d.expression) & !(d.availability) & !(d.willingness) & !(d.sought_help))),nomalizer),
+      category: 'negative behavior', text: "Does not seek help as\n they think they don't need help"
+    }, // didn't complete any of the stages in help seeking behavior
+      // From Expression to Availability
+    {
+      source: 'expression', target: 'availability',
+      value: scalerFunc(passed_awareness.filter(d => ((d.expression))),nomalizer),
+      category: 'positive behavior', text: "Able to explain what they feel"
+    },
+    {
+      source: 'expression', target: 'availability',
+      value: scalerFunc(passed_awareness.filter(d => (!(d.expression) & !(!(d.availability) & !(d.willingness) & !(d.sought_help)))), nomalizer),
+      category: 'negative behavior', text: "Unable to explain what they feel"
+    },
+    {
+      source: 'expression', target: '~expressive and ~sought help',
+      value: scalerFunc(passed_awareness.filter(d => (!(d.expression) & !(d.availability) & !(d.willingness) & !(d.sought_help))), nomalizer),
+      category: 'negative behavior' , text: "Does not seek help as\n they are unable to explain"
+    },
+      // From Availability to Willingness
+    {
+      source: 'availability', target: 'willingness',
+      value: scalerFunc(passed_expression.filter(d => ((d.availability))), nomalizer),
+      category: 'positive behavior' , text: "Knows where to find help"
+    },
+    {
+      source: 'availability', target: 'willingness',
+      value: scalerFunc(passed_expression.filter(d => (!(d.availability) & !(!(d.willingness) & !(d.sought_help)))),nomalizer),
+      category: 'negative behavior', text: "Doesn't know where to find help"
+    },
+    {
+      source: 'availability', target: '~available and ~sought help',
+      value: scalerFunc(passed_expression.filter(d => (!(d.availability) & !(d.willingness) & !(d.sought_help))), nomalizer),
+      category: 'negative behavior' , text:"Does not seek help as they don't know where to find help"
+    },
+      // From Willingness to Help
+    {
+      source: 'willingness', target: 'help',
+      value: scalerFunc(passed_availability.filter(d => ((d.willingness))),nomalizer),
+      category: 'positive behavior', text: "Willing to seek help"
+    },
+    {
+      source: 'willingness', target: 'help',
+      value: scalerFunc(passed_availability.filter(d => ((!(d.willingness)) & (d.sought_help))),nomalizer),
+      category: 'negative behavior' , text: "Unwilling to seek help"
+    },
+    {
+      source: 'willingness', target: '~willing and ~sought help',
+      value: scalerFunc(passed_availability.filter(d => (!(d.willingness) & !(d.sought_help))),nomalizer),
+      category: 'negative behavior', text: "Does not seek help as\n as they are unwilling to seek help"
+    },
+    // Sought Help or Not
+    {
+      source: 'help', target: 'sought_help',
+      value: scalerFunc(passed_willingness.filter(d => ((d.sought_help))),nomalizer),
+      category: 'positive behavior', text: "Sought for help in the end"
+    },
+    {
+      source: 'help', target: 'not_sought_help',
+      value: scalerFunc(passed_willingness.filter(d => (!(d.sought_help))),nomalizer),
+      category: 'negative behavior', text: "Does not seek help"
+    },
+    null // Note : In order to support the link popularizing algorithm
+  ]
+  
+  let new_links = []
+  let limit = 0
+
+  //the link popularizing algorithm : This multiplies the links by the number of values in each link type
+  for (let i = 0; i < links.length; i+=3){
+    
+    for (let j = 0; j < 3; j++) {
+
+      const temp_link = links[j + i]
+      if (temp_link != null) {
+
+        let temp_links = Array(temp_link.value).fill({ source: temp_link.source, target: temp_link.target, value: 1, category: temp_link.category, text: temp_link.text })
+  
+        for (let index = limit; index < limit + temp_link.value; index++) {
+          temp_links[index-limit] = {
+            ...temp_links[index-limit],
+            start_index: index,
+            end_index: j+i %3==2 ? index - limit: index,
+            percentage: temp_link.value // percentage to be displayed when hovered over
+          }
+          
         }
-    }).then(function (data) {
-        // Printing the data
-        console.log(data);
+        limit += temp_link.value
+        new_links = new_links.concat(temp_links)
+        
+      }
 
-        // Check to verify if the value is number, if not parse to integer format
-        convertToInt(data);
+    }
+    limit = 0
+  } 
 
-        // Define height, width and margin
-        var margin = { top: 10, right: 10, bottom: 10, left: 10 };
-        var width = 600 - margin.left - margin.right;
-        var height = 600 - margin.top - margin.bottom;
-
-        // Create svg element with the chosen height and width
-        var svg = d3.select("#myDiv")
-            .append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-        var partition = d3.partition()
-            .size([2 * Math.PI, width / 2]);
-
-        var root = d3.hierarchy(data)
-            .sum(function (d) { return d.value; });
-
-        partition(root);
-
-        // Assign colors to nodes based on the color attribute in the data
-        function assignColor(d) {
-            if (d.data.color) {
-                return d.data.color;
-            } else if (d.parent) {
-                return assignColor(d.parent);
-            } else {
-                return '#faf0e6';
-            }
-        }
-
-        // Drawing arcs for each node in hierarchy
-        var arc = d3.arc()
-            .startAngle(function (d) { return d.x0; })
-            .endAngle(function (d) { return d.x1; })
-            .innerRadius(function (d) { return d.y0; })
-            .outerRadius(function (d) { return d.y1; });
-
-        svg.selectAll("path")
-            .data(root.descendants())
-            .enter().append("path")
-            .attr("d", arc)
-            .attr("fill", function (d) {
-                return assignColor(d);
-            })
-            .attr("stroke", "#fff")
-            .attr("stroke-width", 1.5);
-
-        // Chart labels
-        var labels = svg.selectAll("text")
-            .data(root.descendants())
-            .enter().append("text")
-            .attr("transform", function (d, i) {
-                const radius = Math.min(d.y0, d.y1);
-                const angle = (d.x0 + d.x1) / 2;
-                const x = Math.sin(angle) * (radius + 30);
-                const y = -Math.cos(angle) * (radius + 30);
-                if (i === 0) {
-                    return `(${x},${y})`;
-                }
-                else {
-                    return `translate(${x},${y}) rotate(${angle * (180 / Math.PI)})`
-                };
-            })
-            .attr("font-weight", function (d, i) {
-                return i === 0 ? "bold" : "normal";
-            })
-            .attr("dy", "0.35em")
-            .attr("text-anchor", "middle")
-            .attr("font-size", "12px")
-            .attr("fill", "#000")
-            // .text(function (d, i) {
-            //     if (i === 0) {
-            //         return `For the year: ${selectedYear}`;
-            //     } else if (d.data.name === "Didnot Seek Help") {
-            //         return d.data.name.split("\n");
-            //     } else { return d.data.name; }
-            // });
-            .each(function (d, i) {
-                var labelLines = [];
-                if (i === 0) {
-                    labelLines.push(`For the year: ${selectedYear}`);
-                } else if (d.data.name === "Didnot Seek Help") {
-                    labelLines = d.data.name.split(" ");
-                } else {
-                    labelLines.push(d.data.name);
-                }
-
-                // Calculate total height for multiline text
-                var totalHeight = labelLines.length * 1.2;
-
-                // Add tspan elements for multiline text
-                for (var j = 0; j < labelLines.length; j++) {
-                    d3.select(this).append("tspan")
-                        .attr("x", 0)
-                        .attr("y", -totalHeight / 2 + j * 1.2 + "em") // Align text to center vertically
-                        .attr("text-anchor", "middle") // Align text to center horizontally
-                        .text(labelLines[j]);
-                }
-            });
-
-        // Define legend data
-        var legendData = [
-            { label: 'Male', color: '#a64d79' },
-            { label: 'Male, Perceived Normal', color: '#c27ba0' },
-            { label: 'Male, Not Perceived Normal', color: '#c27ba0' },
-            { label: 'Male, Perceived Normal, Didnot Seek Help', color: '#e36899' },
-            { label: 'Male, Not Perceived Normal, Didnot Seek Help', color: '#e36899' },
-            { label: 'Male, Perceived Normal, Sought Help', color: '#ead1dc' },
-            { label: 'Male, Not Perceived Normal, Sought Help', color: '#ead1dc' },
-
-            { label: 'Female', color: '#45818e' },
-            { label: 'Female, Perceived Normal', color: '#76a5af' },
-            { label: 'Female, Not Perceived Normal', color: '#76a5af' },
-            { label: 'Female, Perceived Normal, Didnot Seek Help', color: '#4ee6e6' },
-            { label: 'Female, Not Perceived Normal, Didnot Seek Help', color: '#4ee6e6' },
-            { label: 'Female, Perceived Normal, Sought Help', color: '#d0e0e3' },
-            { label: 'Female, Not Perceived Normal, Sought Help', color: '#d0e0e3' },
-        ];
-
-        // Calculate legend dimensions and positioning
-        var legendWidth = 1000;
-        var legendHeight = legendData.length * 25;
-        var legendX = 10; // X position of the legend
-        var legendY = 10; // Y position of the legend
-
-        // Create legend SVG container
-        var legendSvg = d3.select("#myLegend")
-            .append("svg")
-            .attr("width", legendWidth)
-            .attr("height", legendHeight)
-            .append("g")
-            .attr("transform", "translate(" + legendX + "," + legendY + ")");
-
-        // Add legend items
-        var legendItems = legendSvg.selectAll('.legend-item')
-            .data(legendData)
-            .enter().append('g')
-            .attr('class', 'legend-item')
-            .attr('transform', function (d, i) {
-                return 'translate(0,' + (i * 20) + ')';
-            });
-
-        legendItems.append('rect')
-            .attr('width', 12)
-            .attr('height', 12)
-            .attr('fill', function (d) { return d.color; });
-
-        legendItems.append('text')
-            .attr('x', 20)
-            .attr('y', 10)
-            .text(function (d) { return d.label; })
-            .attr('font-size', '12px')
-            .attr('fill', '#000');
-
-    }).catch(function (error) {
-        console.log(error);
-    });
+  return {
+    links: new_links,
+    nodes
+  }
 
 }
