@@ -1,29 +1,45 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0;">
 	<title>HELP!</title>
 	<link rel="stylesheet" type="text/css" href="./css/style.css">
 </head>
-<body>
-	<h1 class="responsive-svg-container" style="text-align:center; font-size: 50px;">
-		HELP!
-	</h1>
-	<h2 class="responsive-svg-container" style="text-align:center; font-size: 15px;">
-		Although it is very important for individuals with mental illnesses to seek for the help they need <br>some might end up seeking help and unfortuantely some might not.<br>
-		Every phase of the help-seeking process poses its own challenges making their journey to seek help difficult.
-	</h1>
-	<div id="bar" class="responsive-svg-container"></div>
-	<div id="bar2" class="responsive-svg-container overlay"></div>
 
-	<div id="footer" class="footer">
-		<text>Based on <a href="https://healthymindsnetwork.org/hms/">The Healthy Minds Network Dataset</a></text>
-	</div>
-	
-	<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-	<script src="https://unpkg.com/d3-sankey@0.12.3"></script>
-	<script type="module" src="./js/script.js"></script>
-	<script type="module" src="./js/awareness_subgraph.js"></script>
+<body style="background-color: black;">
+	<h1 class="responsive-svg-container" style="text-align:center; font-size: 50px;">
+		<font color="#ff00b4">H</font>
+		<font color="#00ffbc">E</font>
+		<font color="#8ea5ff">L</font>
+		<font color="#c493ff">P</font>
+		<font color="#ffac00">!</font>
+	</h1>
+	<h2 class="responsive-svg-container" style="text-align:center; font-size: 15px; color: white;">
+		Although it is very important for individuals with mental illnesses to seek for the help they need <br>some
+		might end up seeking help and unfortuantely some might not.<br>
+		Every phase of the help-seeking process poses its own challenges making their journey to seek help difficult.
+		</h1>
+		<div class="responsive-svg-container" style="text-align:center;">
+			<button class="button_click" id="awareness" style="background-color: #ff00b4;">AWARENESS</button>
+			<button class="button_click" id="expression" style="background-color: #00ffbc;">EXPRESSION</button>
+			<button class="button_click" id="availability" style="background-color: #8ea5ff;">AVAILABILITY</button>
+			<button class="button_click" id="willingness" style="background-color: #c493ff;">WILLINGNESS</button>
+		</div>
+		<div id="bar" class="responsive-svg-container"></div>
+		<div id="bar2" class="responsive-svg-container"></div>
+		<div id="bar3" class="responsive-svg-container"></div>
+
+		<div id="footer" class="footer">
+			<text ><font color="white">Based on </font><a href="https://healthymindsnetwork.org/hms/">The Healthy Minds Network Dataset</a></text>
+		</div>
+
+		<script type='text/javascript' src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+		<script src="https://unpkg.com/d3-sankey@0.12.3"></script>
+		<script type="module" src="./js/script.js"></script>
+		<script type="module" src="./js/diverge_script.js"></script>
+		<script type="module" src="./js/diverge_script_failure.js"></script>
 </body>
+
 </html>

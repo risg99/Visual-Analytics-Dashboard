@@ -2,6 +2,11 @@ body {
   font-family: 'Courier New', monospace; 
 }
 
+.tooltip {
+  display: inline;
+  position: fixed
+}
+
 .responsive-svg-container {
   margin-right: auto;
   margin-left: auto;
@@ -73,4 +78,23 @@ body {
   font-size: 16px;
   background-color: #fff;
   color: #555;
+}
+
+.button_click {
+	color: black;
+	height: 3em;
+	width: 20%;
+	padding: 0.5em auto;
+	margin: 1em auto;
+  font-size: medium;
+	border: none;
+	border-radius: 3px;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button_click:hover {
+	letter-spacing: 0.3em;
+  opacity: 0.75;
 }
