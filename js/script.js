@@ -114,7 +114,18 @@ function zoom(buttonID) {
 function zoomOut(buttonID) {
 	d3.select(`#stage-${buttonID}`).transition().duration(1000).style('font-size', '800px');
 
-	d3.selectAll('.stage-desc').transition().duration(1000).attr('opacity', 0);
+	// d3.selectAll('.stage-desc').transition().duration(1000).attr('opacity', 0)
+	d3.selectAll('.stage-desc').transition().duration(500).attr('opacity', 1).attr('stroke', '#3d144c');
+
+	d3.select('#stage-desc-1')
+	.html(
+		`<div style="color:#3d144c;  font-size:800px; font-weight: 700;"><h2 style="font-size:500">
+		PROGRESSION OF INDIVIDUALS <br>ACROSS STAGES OF <br>MENTAL-HEALTH HELP SEEKING PROCESS</h2>
+		They go through the four stages while seeking help<br><br>
+		Some fallout of the process as due to the challenges posed by each stage.<br><br>
+		Even if they pass through all the stages they might decide to not seek help in the end
+		</div>`
+	);
 
 	buttonID = buttonID.includes('-') ? `.point-${buttonID}_end` : `.point-${buttonID}_fallout`;
 	d3.selectAll(buttonID).transition().duration(1000).attr('r', 200);
@@ -210,12 +221,12 @@ const createMainFlowChart = (data) => {
 	stage_desc
 		.append('rect')
 		.attr('class', 'stage-desc')
-		.attr('opacity', 0)
+		.attr('opacity', 1)
 		.attr('x', 1000)
 		.attr('y', 1000)
 		.attr('width', 30000)
 		.attr('height', 15000)
-		.attr('stroke', 'black')
+		.attr('stroke', '#3d144c')
 		.attr('stroke-width', '100px')
 		.attr('rx', 600)
 		.attr('ry', 600)
@@ -234,7 +245,15 @@ const createMainFlowChart = (data) => {
 		.style('alignment-baseline', 'middle')
 		.style('text-align', 'left')
 		.attr('x', 2500)
-		.attr('y', 1100);
+		.attr('y', 1100)
+		.html(
+			`<div style="color:#3d144c;  font-size:800px; font-weight: 700;"><h2 style="font-size:500">
+			PROGRESSION OF INDIVIDUALS <br>ACROSS STAGES OF <br>MENTAL-HEALTH HELP SEEKING PROCESS</h2>
+			They go through the four stages while seeking help.<br><br>
+			Some fallout of the process as due to the challenges posed by each stage.<br><br>
+			Even if they pass through all the stages they might decide to not seek help in the end
+			</div>`
+		);
 
 	// Creates the transparent circles that represent the nodes.
 	const circle_node = svg
@@ -532,7 +551,7 @@ const createMainFlowChart = (data) => {
 				`<div style="color:#c493ff; font-size:700px; font-weight: 700;">
 				The largest fallout is during the stage of WILLINGNESS
 				</div>`
-			);;
+			);
 
 
 	return svg.node();
@@ -583,13 +602,13 @@ function getPath(d, curve, y_multiplier) {
 				let targetY = d.target.y + (d.target.index_axis == 1 ? d.end_index * y_multiplier : 0)
 
 				let path = d.path.replace('SourceX', sourceX).replace('SourceY', sourceY)
-					.replace('Control1X', d.controlPoint.x1 + (d.target.name == 'awareness' ?  (-d.start_index * 10):
+					.replace('Control1X', d.controlPoint.x1 + (d.target.name == 'awareness' ?  (d.start_index * 7):
 						(d.target.name == 'availability' ? (d.start_index * 50) :
 							(d.target.name == 'willingness'? (-d.start_index * 45): 0))))
-					.replace('Control2X', d.controlPoint.x2 + (d.target.name == 'awareness' ? (d.start_index * 10):
+					.replace('Control2X', d.controlPoint.x2 + (d.target.name == 'awareness' ? (-d.start_index * 30):
 						(d.target.name == 'availability' ? (d.start_index * 65) :
 							(d.target.name == 'willingness' ? 0 : 0))))
-					.replace('Control2Y',d.controlPoint.y2 + (d.target.index_axis == 1 ? d.end_index * y_multiplier : 0))
+					.replace('Control2Y',d.controlPoint.y2 + (d.target.index_axis == 1 ? d.end_index * 100 : 0))
 					.replace('RelTargetX', targetX - sourceX)
 					.replace('RelTargetY', targetY - sourceY);
 

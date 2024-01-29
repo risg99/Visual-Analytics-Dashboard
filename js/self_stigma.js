@@ -100,7 +100,7 @@ function chart(data) {
     // Specify the chart’s dimensions.
     const width = 1500;
     const height = 400;
-    const marginTop = 100;
+    const marginTop = 80;
     const marginRight = 150;
     const marginBottom = 70;
     const marginLeft = 150;
@@ -142,13 +142,13 @@ function chart(data) {
         .attr('preserveAspectRatio', 'xMinYMin meet');
     
     	// Append the vertical axis.
-	let y_axis = svg
-    .append('g')
-    .attr('transform', `translate(${marginLeft},0)`)
-    .call(d3.axisLeft(y).tickFormat(formatValue).tickSize(-(width - marginLeft - marginRight)))
-    .call((g) => g.selectAll('.domain').remove());
-    y_axis.selectAll('line').style('stroke', 'white');
-    y_axis.selectAll('text').style('stroke', 'white');
+        let y_axis = svg
+        .append('g')
+        .attr('transform', `translate(${marginLeft},0)`)
+        .call(d3.axisLeft(y).tickFormat(formatValue).tickSize(-(width - marginLeft - marginRight)))
+        .call((g) => g.selectAll('.domain').remove());
+        y_axis.selectAll('line').style('stroke', 'white');
+        y_axis.selectAll('text').style('stroke', 'white');
 
     
 	// Append a group for each state, and a rect for each age.
@@ -201,8 +201,6 @@ function chart(data) {
             .style('font-size', '13px')
         .html((d) => `${d[0]}`)
 );
-
-    
 
     		// Add a legend.
 	const legend = svg

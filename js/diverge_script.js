@@ -158,7 +158,7 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 		// Create the SVG container.
 		const svg = d3
 			.select('#bar2')
-			.append('svg')
+			.select('#svg-1')
 			.attr('viewBox', [0, 0, width, height])
 			.attr('style', 'margin-top: 10px; margin-bottom: -20px; max-width: 100%; height: auto; font: 10px sans-serif;')
 			.attr('preserveAspectRatio', 'xMinYMin meet');
