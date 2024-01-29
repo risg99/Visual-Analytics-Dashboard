@@ -121,6 +121,7 @@ function zoomOut(buttonID) {
 	.html(
 		`<div style="color:#3d144c;  font-size:800px; font-weight: 700;"><h2 style="font-size:500">
 		PROGRESSION OF INDIVIDUALS <br>ACROSS STAGES OF <br>MENTAL-HEALTH HELP SEEKING PROCESS</h2>
+		Each strand represents 1% of students with mental health illness<br><br>
 		They go through the four stages while seeking help<br><br>
 		Some fallout of the process as due to the challenges posed by each stage.<br><br>
 		Even if they pass through all the stages they might decide to not seek help in the end
@@ -249,7 +250,8 @@ const createMainFlowChart = (data) => {
 		.html(
 			`<div style="color:#3d144c;  font-size:800px; font-weight: 700;"><h2 style="font-size:500">
 			PROGRESSION OF INDIVIDUALS <br>ACROSS STAGES OF <br>MENTAL-HEALTH HELP SEEKING PROCESS</h2>
-			They go through the four stages while seeking help.<br><br>
+			Each strand represents 1% of students with mental health illness<br><br>
+			They go through the four stages while seeking help<br><br>
 			Some fallout of the process as due to the challenges posed by each stage.<br><br>
 			Even if they pass through all the stages they might decide to not seek help in the end
 			</div>`
