@@ -48,6 +48,28 @@ const stageButtons = () => {
 		let buttonID = d3.select(this).attr('id');
 		zoomOut(buttonID);
 	});
+
+	d3.selectAll('.button_click').on('click', function () {
+		let buttonID = d3.select(this).attr('id');
+		console.log(buttonID)
+		if (buttonID == 'willingness') {
+			d3.select('#svg-1').attr('opacity', 1)
+			d3.select('#svg-2').attr('opacity', 1)
+			d3.select('#svg-3').attr('opacity', 1)
+			d3.select('#heading1').style('opacity', 1)
+			d3.select('#heading2').style('opacity', 1)
+			d3.select('#heading3').style('opacity', 1)
+			d3.select('#heading4').style('opacity', 1)
+		} else {
+			d3.select('#svg-1').attr('opacity', 0)
+			d3.select('#svg-2').attr('opacity', 0)
+			d3.select('#svg-3').attr('opacity', 0)
+			d3.select('#heading1').style('opacity', 0)
+			d3.select('#heading2').style('opacity', 0)
+			d3.select('#heading3').style('opacity', 0)
+			d3.select('#heading4').style('opacity', 0)
+		}
+	});
 };
 
 function zoom(buttonID) {

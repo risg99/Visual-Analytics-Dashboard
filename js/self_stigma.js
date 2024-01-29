@@ -136,7 +136,8 @@ function chart(data) {
 	// Create the SVG container.
 	const svg = d3
 		.select('#bar4')
-		.append('svg')
+        .append('svg')
+        .attr('id','svg-3')
 		.attr('viewBox', [0, 0, width, height])
         .attr('style', 'margin-top: 15px; margin-bottom: -30px; max-width: 100%; height: auto; font: 10px sans-serif;')
         .attr('preserveAspectRatio', 'xMinYMin meet');
