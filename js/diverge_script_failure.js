@@ -151,7 +151,7 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 		const svg = d3
 			.select('#svg-2')
 			.attr('viewBox', [0, 0, width, height])
-			.attr('style', 'margin-top: 180px; max-width: 100%; height: auto; font: 10px sans-serif;')
+			.attr('style', 'margin-top: 100px; max-width: 100%; height: auto; font: 10px sans-serif;')
 			.attr('preserveAspectRatio', 'xMinYMin meet');
 
 		// Append a rect for each value, with a tooltip.
