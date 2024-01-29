@@ -14,23 +14,9 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 		perceived_stig: categories[+d.stig_pcv_3],
 		personal_stig: categories[+d.stig_per_3],
 		value: 1,
-
-		// name: data.speaker,
-		// category: categories[data.ruling],
-		// value: +data.count
 	};
-	// categories[category] ? { data.name, category: categories[category], value: +value } : null}
 })
 	.then((data) => {
-		let perceived_stigma = d3.group(data, (d) => d.perceived_stig);
-
-		perceived_stigma = d3.map(perceived_stigma, (d) => {
-			return {
-				name: 'Most people feel that<br> receiving mental health treatment<br> is a sign of personal failure',
-				category: d[0],
-				value: d[1].length,
-			};
-		});
 
 		let personal_stigma = d3.group(data, (d) => d.personal_stig);
 
@@ -42,7 +28,17 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 			};
 		});
 
-		let stigma = [].concat(perceived_stigma, personal_stigma);
+		let perceived_stigma = d3.group(data, (d) => d.perceived_stig);
+
+		perceived_stigma = d3.map(perceived_stigma, (d) => {
+			return {
+				name: 'Most people feel that<br> receiving mental health treatment<br> is a sign of personal failure',
+				category: d[0],
+				value: d[1].length,
+			};
+		});
+
+		let stigma = [].concat(personal_stigma, perceived_stigma);
 
 		// Normalize absolute values to percentage.
 		d3.rollup(
@@ -64,6 +60,31 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 		});
 	})
 	.then((data) => {
+
+		// A function to format a percentage, used both on the axis and in the tooltips.
+		const formatValue = (
+			(format) => (x) =>
+				format(Math.abs(x))
+		)(d3.format('.0%'));
+
+		// Create tootip
+		let tooltip = d3
+		.select('.tooltip-2')
+
+		let mouseover = function (d) {
+			tooltip.style('opacity', 1);
+		};
+		let mousemove = function (i, d) {
+			tooltip
+				.html(`${d.key}<br>${formatValue(d.data[1].get(d.key))}%`)
+				.style('left', i.clientX + 20+ 'px')
+				.style('top', i.clientY +30 + 'px');
+		};
+
+		let mouseleave = function (d) {
+			tooltip.style('opacity', 0);
+		};
+		
 		// Assign a valence to each category.
 		const signs = new Map(
 			[].concat(
@@ -84,10 +105,10 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 
 		// Specify the chart’s dimensions, with a space of height 33px for each candidate.
 		const width = 928;
-		const marginTop = 100;
+		const marginTop = 50;
 		const marginRight = 150;
 		const marginBottom = 0;
-		const marginLeft = 200;
+		const marginLeft = 150;
 		const height = bias.length * 53 + marginTop + marginBottom;
 
 		// Prepare the stack; the values are stacked from the inside out, starting with more
@@ -126,20 +147,14 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 			.domain([].concat(data.negatives, data.positives))
 			.range(d3.schemePRGn[data.negatives.length + data.positives.length]);
 
-		// A function to format a percentage, used both on the axis and in the tooltips.
-		const formatValue = (
-			(format) => (x) =>
-				format(Math.abs(x))
-		)(d3.format('.0%'));
-
-		d3.select('#bar2').attr('style', `margin-top: 200px; margin-bottom: 100px; max-width: 88%`);
+		d3.select('#bar2').attr('style', `margin-bottom: 100px; max-width: 88%`);
 
 		// Create the SVG container.
 		const svg = d3
 			.select('#bar2')
 			.append('svg')
 			.attr('viewBox', [0, 0, width, height])
-			.attr('style', 'max-width: 100%; height: auto; font: 10px sans-serif;')
+			.attr('style', 'margin-top: 180px; max-width: 100%; height: auto; font: 10px sans-serif;')
 			.attr('preserveAspectRatio', 'xMinYMin meet');
 
 		// Append a rect for each value, with a tooltip.
@@ -156,11 +171,14 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 			.attr('y', ({ data: [name] }) => y(name))
 			.attr('width', (d) => x(d[1]) - x(d[0]))
 			.attr('height', y.bandwidth())
-			.append('title')
-			.text(
-				({ key, data: [name, value] }) => `${name}
-  ${formatValue(value.get(key))} ${key}`
-			);
+			.attr('pointer-events', 'visibleFill')
+            .on('mouseover', (i, d) => mouseover(i))
+            .on('mousemove', (i, d) => mousemove(i, d))
+            .on('mouseleave', (i, d) => mouseleave(i));
+			// .append('title')
+			// .text(
+			// 	({ key, data: [name, value] }) => `${key} ${formatValue(value.get(key))}`
+			// );
 
 		// Create the axes.
 		var axis = svg
@@ -201,10 +219,6 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 			.style('stroke', 'white')
 			.style('stroke-width', 0.7);
 
-			const formatTextValue = (
-				(format) => (x) =>
-					format(Math.abs(x))
-		)(d3.format('.0%'));
 		
 		var axis2 = svg.append('g').call(d3.axisLeft(y).tickSizeOuter(0));
 
@@ -250,7 +264,7 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 			.selectAll('g')
 			.data([].concat(data.negatives, data.positives).reverse())
 			.join('g')
-			.attr('transform', (d, i) => `translate(0,${(i * 20)+80})`);
+			.attr('transform', (d, i) => `translate(0,${(i * 20)+30})`);
 
 		legend
 			.append('rect')
@@ -267,8 +281,6 @@ d3.csv('../data/mh_data_1.csv', function (d) {
             .attr('text-anchor', 'end')
             .attr('fill', 'white')
 			.text((d) => d);
-
-		legend.append('title').text((d) => d);
 
 		// Return the color scale as a property of the node, for the legend.
 		return Object.assign(svg.node(), { scales: { color } });

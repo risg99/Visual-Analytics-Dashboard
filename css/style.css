@@ -7,6 +7,11 @@ body {
   position: fixed
 }
 
+.tooltip-2 {
+  display: inline;
+  position: fixed
+}
+
 .responsive-svg-container {
   margin-right: auto;
   margin-left: auto;
