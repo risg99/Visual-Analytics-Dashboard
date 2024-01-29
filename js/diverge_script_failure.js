@@ -175,10 +175,6 @@ d3.csv('../data/mh_data_1.csv', function (d) {
             .on('mouseover', (i, d) => mouseover(i))
             .on('mousemove', (i, d) => mousemove(i, d))
             .on('mouseleave', (i, d) => mouseleave(i));
-			// .append('title')
-			// .text(
-			// 	({ key, data: [name, value] }) => `${key} ${formatValue(value.get(key))}`
-			// );
 
 		// Create the axes.
 		var axis = svg
