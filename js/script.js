@@ -582,8 +582,6 @@ function getPath(d, curve, y_multiplier) {
 				let targetX = d.target.x + (d.target.index_axis == 0 ? d.end_index * y_multiplier : 0)
 				let targetY = d.target.y + (d.target.index_axis == 1 ? d.end_index * y_multiplier : 0)
 
-
-				console.log(d.target.name, d.controlPoint.y2 + (d.target.index_axis == 1 ? d.end_index * y_multiplier : 0), targetY -sourceY, targetY, sourceY )
 				let path = d.path.replace('SourceX', sourceX).replace('SourceY', sourceY)
 					.replace('Control1X', d.controlPoint.x1 + (d.target.name == 'awareness' ?  (-d.start_index * 10):
 						(d.target.name == 'availability' ? (d.start_index * 50) :
@@ -594,7 +592,7 @@ function getPath(d, curve, y_multiplier) {
 					.replace('Control2Y',d.controlPoint.y2 + (d.target.index_axis == 1 ? d.end_index * y_multiplier : 0))
 					.replace('RelTargetX', targetX - sourceX)
 					.replace('RelTargetY', targetY - sourceY);
-				// console.log(path)
+
 				return path
 			}
 

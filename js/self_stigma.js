@@ -1,8 +1,4 @@
 d3.csv('../data/mh_data_1.csv', function (d) {
-	//     console.log(data)
-	//     const ages = data.columns.slice(1);
-	//     data = d3.sort(data, d => -d3.sum(ages, age => d[age])).slice(0, 6);
-	//   return ages.flatMap((age) => data.map((d) => ({state: d.name, age, population: d[age]})));
 
 	const categories = {
 		1: 'Strongly Disagree',
@@ -62,14 +58,46 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 		(d) => d.name
 	);
 
-	console.log(selfstigma);
-
 	chart(selfstigma);
 });
 
 function chart(data) {
+
+    // Create tootip
+
+    const formatTooltipValue = (
+        (format) => (x) =>
+            format(Math.abs(x))
+    )(d3.format('.00%'));
+
+		let tooltip = d3
+			.select('#bar4')
+			.append('div')
+			.style('opacity', 0)
+			.attr('class', 'tooltip-2')
+			.style('background-color', 'white')
+			.style('border', 'solid')
+			.style('border-width', '2px')
+			.style('border-radius', '5px')
+			.style('padding', '10px')
+			.style('font-size', '15px')
+			.style('text-align', 'center');
+
+    let mouseover = function (d) {
+        tooltip.style('opacity', 1);
+    };
+    let mousemove = function (i, d) {
+        tooltip
+            .html(`${d.category}<br>${formatTooltipValue(d.value)}`)
+            .style('left', i.clientX + 20+ 'px')
+            .style('top', i.clientY +30 + 'px');
+    };
+
+    let mouseleave = function (d) {
+        tooltip.style('opacity', 0);
+    };
+    
     // Specify the chart’s dimensions.
-    console.log(data)
     const width = 1500;
     const height = 400;
     const marginTop = 100;
@@ -113,17 +141,6 @@ function chart(data) {
         .attr('style', 'margin-top: 15px; margin-bottom: -30px; max-width: 100%; height: auto; font: 10px sans-serif;')
         .attr('preserveAspectRatio', 'xMinYMin meet');
     
-    // let ticks = [0,5,10,15,20,25,30,35,40,45]
-    // let gridlines = d3.axisLeft(y).tickFormat(formatValue).tickValues(ticks)
-    // .tickValues(ticks)
-    //     .tickSize(width - marginLeft - marginRight)
-    
-    // svg.append("g")
-    //     .attr("class", "grid")
-    //     .call(gridlines);
-    
-    // gridlines.selectAll('line').style('stroke', 'white');
-
     	// Append the vertical axis.
 	let y_axis = svg
     .append('g')
@@ -148,7 +165,11 @@ function chart(data) {
 		.attr('y', (d) => y(d.value))
 		.attr('width', x.bandwidth())
 		.attr('height', (d) => y(0) - y(d.value))
-		.attr('fill', (d) => color(d.category));
+        .attr('fill', (d) => color(d.category))
+        .attr('pointer-events', 'visibleFill')
+        .on('mouseover', (i, d) => mouseover(i))
+        .on('mousemove', (i, d) => mousemove(i, d))
+        .on('mouseleave', (i, d) => mouseleave(i));
 
 	// Append the horizontal axis.
 	let x_axis = svg

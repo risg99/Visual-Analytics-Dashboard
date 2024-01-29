@@ -50,8 +50,6 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 			(d) => d.name
 		);
 
-		console.log(stigma);
-
 		return Object.assign(stigma, {
 			negative: '← Disagree',
 			positive: 'Agree →',

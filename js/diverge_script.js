@@ -117,7 +117,6 @@ d3.csv('../data/mh_data_1.csv', function (d) {
 		const marginLeft = 150;
 		const height = bias.length * 53 + marginTop + marginBottom;
 
-		console.log(height)
 		// Prepare the stack; the values are stacked from the inside out, starting with more
 		// moderate values (“mostly false”, “half true”), and ending with the extreme values.
 		const series = d3
