@@ -255,7 +255,7 @@ const createMainFlowChart = (data) => {
 		mentalHealthProblem: [0, 4000, 600],
 		awareness: [35, 8000, -3000],
 		'~aware and ~sought help': [0, -1500, -1500],
-		expression: [-75, 9000, 6500],
+		expression: [-75, 9000, 10000],
 		'~expressive and ~sought help': [0, -900, -1000],
 		availability: [55, 11000, -3500],
 		'~available and ~sought help': [0, -1500, -1000],
@@ -314,8 +314,6 @@ const createMainFlowChart = (data) => {
 			d.target.x + (d.target.index_axis == 0 ? d.end_index * y_multiplier : 0),
 			d.target.y + (d.target.index_axis == 1 ? d.end_index * y_multiplier : 0),
 		])
-		.x((d) => d[0])
-		.y((d) => d[1]);
 
 	link
 		.append('path')
@@ -479,7 +477,6 @@ const createMainFlowChart = (data) => {
 			d3.select(this).transition().duration(1000).style('font-size', '1200px');
 
 			let type = d3.select(this).attr('class');
-			console.log(type.replace('legend-text-', ''));
 
       d3.select(`.${type.replace('text', 'circle')}`)
         .transition()
@@ -576,7 +573,34 @@ function getPath(d, curve, y_multiplier) {
 		}
 		return path;
 	} else {
-		return curve(d);
+
+		if (d.path != null) {
+			if (d.path.includes('Control1X')) {
+
+				let sourceX = d.source.x + (d.source.index_axis == 0 ? d.start_index * y_multiplier : 0)
+				let sourceY = d.source.y + (d.source.index_axis == 1 ? d.start_index * y_multiplier : 0)
+				let targetX = d.target.x + (d.target.index_axis == 0 ? d.end_index * y_multiplier : 0)
+				let targetY = d.target.y + (d.target.index_axis == 1 ? d.end_index * y_multiplier : 0)
+
+
+				console.log(d.target.name, d.controlPoint.y2 + (d.target.index_axis == 1 ? d.end_index * y_multiplier : 0), targetY -sourceY, targetY, sourceY )
+				let path = d.path.replace('SourceX', sourceX).replace('SourceY', sourceY)
+					.replace('Control1X', d.controlPoint.x1 + (d.target.name == 'awareness' ?  (-d.start_index * 10):
+						(d.target.name == 'availability' ? (d.start_index * 50) :
+							(d.target.name == 'willingness'? (-d.start_index * 45): 0))))
+					.replace('Control2X', d.controlPoint.x2 + (d.target.name == 'awareness' ? (d.start_index * 10):
+						(d.target.name == 'availability' ? (d.start_index * 65) :
+							(d.target.name == 'willingness' ? 0 : 0))))
+					.replace('Control2Y',d.controlPoint.y2 + (d.target.index_axis == 1 ? d.end_index * y_multiplier : 0))
+					.replace('RelTargetX', targetX - sourceX)
+					.replace('RelTargetY', targetY - sourceY);
+				// console.log(path)
+				return path
+			}
+
+		} else {
+			return curve(d);
+		}
 	}
 }
 
@@ -803,6 +827,12 @@ const dataProcessingForMainFlowChart = (data, width, height) => {
 				source: 'mentalHealthProblem',
 				target: 'awareness',
 				value: scalerFunc(data, nomalizer),
+				controlPoint: {
+					x1: 5666.667,
+					x2: 5666.667,
+					y2:-16000
+				},
+				path: 'MSourceX,SourceYcControl1X,0,Control2X,Control2Y,RelTargetX,RelTargetY',
 				text: '',
 				dif_end: false,
 			},
@@ -846,6 +876,11 @@ const dataProcessingForMainFlowChart = (data, width, height) => {
 					),
 					nomalizer
 				),
+				controlPoint: {
+					x1: 6666.666,
+					x2: 6666.666
+				},
+				path : 'MSourceX,SourceYcControl1X,0,Control2X,-24000,RelTargetX,RelTargetY',
 				text: 'Able to explain what they feel',
 				dif_end: false,
 			},
@@ -883,6 +918,11 @@ const dataProcessingForMainFlowChart = (data, width, height) => {
 					passed_expression.filter((d) => d.availability || !d.availability & !(!d.willingness & !d.sought_help)),
 					nomalizer
 				),
+				controlPoint: {
+					x1: 6666.667,
+					x2: 6666.667
+				},
+				path :'MSourceX,SourceYcControl1X,0,Control2X,12000,RelTargetX,RelTargetY',
 				text: 'Knows where to find help',
 				dif_end: false,
 			},
@@ -988,6 +1028,7 @@ const dataProcessingForMainFlowChart = (data, width, height) => {
 				path: temp_link.path,
 				dif_end: temp_link.dif_end,
 				intPoint: temp_link.intPoint,
+				controlPoint: temp_link.controlPoint,
 				name: temp_link.name,
 			});
 
